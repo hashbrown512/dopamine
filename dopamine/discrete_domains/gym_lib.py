@@ -38,6 +38,7 @@ import tensorflow.compat.v1 as tf
 import gin.tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib import slim as contrib_slim
+from rl_abr.envs.abr import ABRSimEnv
 
 
 CARTPOLE_MIN_VALS = np.array([-2.4, -5., -math.pi/12., -math.pi*2.])
@@ -52,6 +53,12 @@ gin.constant('gym_lib.ACROBOT_OBSERVATION_DTYPE', tf.float64)
 gin.constant('gym_lib.ACROBOT_STACK_SIZE', 1)
 
 
+ABR_MIN_VALS = np.array([0] * 11)
+ABR_MAX_VALS = np.array([1] * 11)
+gin.constant('gym_lib.ABR_OBSERVATION_SHAPE', (11, 1))
+gin.constant('gym_lib.ABR_OBSERVATION_DTYPE', tf.float32)
+gin.constant('gym_lib.ABR_STACK_SIZE', 1)
+
 @gin.configurable
 def create_gym_environment(environment_name=None, version='v0'):
   """Wraps a Gym environment with some basic preprocessing.
@@ -65,9 +72,13 @@ def create_gym_environment(environment_name=None, version='v0'):
   """
   assert environment_name is not None
   full_game_name = '{}-{}'.format(environment_name, version)
-  env = gym.make(full_game_name)
+  # Custom
+  if environment_name == 'ABR':
+    env = ABRSimEnv(normalize_obs=True)
+  else:
+    env = gym.make(full_game_name)
   # Strip out the TimeLimit wrapper from Gym, which caps us at 200 steps.
-  env = env.env
+    env = env.env
   # Wrap the returned environment in a class which conforms to the API expected
   # by Dopamine.
   env = GymPreprocessing(env)
@@ -540,6 +551,59 @@ def acrobot_rainbow_network(num_actions, num_atoms, support, network_type,
   """
   net = _basic_discrete_domain_network(
       ACROBOT_MIN_VALS, ACROBOT_MAX_VALS, num_actions, state,
+      num_atoms=num_atoms)
+  logits = tf.reshape(net, [-1, num_actions, num_atoms])
+  probabilities = contrib_layers.softmax(logits)
+  q_values = tf.reduce_sum(support * probabilities, axis=2)
+  return network_type(q_values, logits, probabilities)
+
+@gin.configurable
+class ABRRainbowNetwork(tf.keras.Model):
+  """Keras Rainbow network for Acrobot."""
+
+  def __init__(self, num_actions, num_atoms, support, name=None):
+    """Builds the deep network used to compute the agent's Q-values.
+
+    It rescales the input features to a range that yields improved performance.
+
+    Args:
+      num_actions: int, number of actions.
+      num_atoms: int, the number of buckets of the value function distribution.
+      support: Tensor, the support of the Q-value distribution.
+      name: str, used to create scope for network parameters.
+    """
+    super(ABRRainbowNetwork, self).__init__(name=name)
+    self.net = BasicDiscreteDomainNetwork(
+        ABR_MIN_VALS, ABR_MAX_VALS, num_actions, num_atoms=num_atoms)
+    self.num_actions = num_actions
+    self.num_atoms = num_atoms
+    self.support = support
+
+  def call(self, state):
+    x = self.net(state)
+    logits = tf.reshape(x, [-1, self.num_actions, self.num_atoms])
+    probabilities = contrib_layers.softmax(logits)
+    q_values = tf.reduce_sum(self.support * probabilities, axis=2)
+    return atari_lib.RainbowNetworkType(q_values, logits, probabilities)
+
+
+@gin.configurable
+def abr_rainbow_network(num_actions, num_atoms, support, network_type,
+                            state):
+  """Build the deep network used to compute the agent's Q-value distributions.
+
+  Args:
+    num_actions: int, number of actions.
+    num_atoms: int, the number of buckets of the value function distribution.
+    support: tf.linspace, the support of the Q-value distribution.
+    network_type: `namedtuple`, collection of expected values to return.
+    state: `tf.Tensor`, contains the agent's current state.
+
+  Returns:
+    net: _network_type object containing the tensors output by the network.
+  """
+  net = _basic_discrete_domain_network(
+      ABR_MIN_VALS, ABR_MAX_VALS, num_actions, state,
       num_atoms=num_atoms)
   logits = tf.reshape(net, [-1, num_actions, num_atoms])
   probabilities = contrib_layers.softmax(logits)
