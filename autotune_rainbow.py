@@ -67,7 +67,7 @@ def run(mrh, up, tup):
     num_iterations = 10
     # num_training_steps = 1000
     # evaluation_steps = 1000
-    # num_iterations = 2
+    # num_iterations = 6
 
     kwargs = {"min_replay_history": mrh, "update_period": up,
               "training_steps": num_training_steps,
@@ -75,7 +75,7 @@ def run(mrh, up, tup):
               "num_iterations": num_iterations}
     config = gen_config(**kwargs)
     gin.parse_config(config, skip_unknown=False)
-    LOG_PATH = DIR + str(mrh) + "_" + str(up)
+    LOG_PATH = DIR + str(mrh) + "_" + str(up) + '_' + str(tup)
 
     def create_agent(sess, environment, summary_writer=None):
         return rainbow_agent.RainbowAgent(sess, num_actions=environment.action_space.n)
@@ -85,13 +85,13 @@ def run(mrh, up, tup):
     rainbow_runner.run_experiment()
     data = colab_utils.read_experiment(
         LOG_PATH, verbose=True, summary_keys=['train_episode_returns', 'train_average_return'])
-    final_eval = data.loc[data['iteration'] == num_iterations - 1]['train_episode_returns'][1]
+    final_eval = data.loc[data['iteration'] == num_iterations - 1]['train_episode_returns'][data['iteration'] == num_iterations - 1]
     return final_eval
 
 def objective(trial):
     min_replay_histories = trial.suggest_int('min_replay_histories', 100, 40000)
     update_periods = trial.suggest_int('update_periods', 1, 8)
-    target_update_periods = trial.suggest_uniform('target_update_periods', 50, 80000)
+    target_update_periods = trial.suggest_int('target_update_periods', 50, 80000)
 
     return -1 * run(min_replay_histories, update_periods, target_update_periods)
 
