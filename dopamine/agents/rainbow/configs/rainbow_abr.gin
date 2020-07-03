@@ -1,4 +1,4 @@
-# Hyperparameters for a simple Rainbow-style Acrobot agent. The hyperparameters
+
 # chosen achieve reasonable performance.
 import dopamine.agents.rainbow.rainbow_agent
 import dopamine.discrete_domains.gym_lib
