@@ -12,7 +12,7 @@ def create_folder_if_not_exists(folder_path):
         os.makedirs(folder_path, exist_ok=True)
 
 
-def gen_config(min_replay_history, update_period, target_update_period, num_iterations, training_steps,
+def gen_config(update_horizon, min_replay_history, update_period, target_update_period, learning_rate, num_iterations, training_steps,
                evaluation_steps):
     config = """
     # chosen achieve reasonable performance.
@@ -29,7 +29,7 @@ def gen_config(min_replay_history, update_period, target_update_period, num_iter
     RainbowAgent.num_atoms = 51
     RainbowAgent.vmax = 10.
     RainbowAgent.gamma = 0.99
-    RainbowAgent.update_horizon = 3
+    RainbowAgent.update_horizon = {}
     RainbowAgent.min_replay_history = {}
     RainbowAgent.update_period = {}
     RainbowAgent.target_update_period = {}
@@ -39,7 +39,7 @@ def gen_config(min_replay_history, update_period, target_update_period, num_iter
     RainbowAgent.tf_device = '/cpu:*'
     RainbowAgent.optimizer = @tf.train.AdamOptimizer()
 
-    tf.train.AdamOptimizer.learning_rate = 0.09
+    tf.train.AdamOptimizer.learning_rate = {}
     tf.train.AdamOptimizer.epsilon = 0.0003125
 
     # TODO: figure out how to make the environment with gym make
@@ -54,12 +54,12 @@ def gen_config(min_replay_history, update_period, target_update_period, num_iter
 
     WrappedPrioritizedReplayBuffer.replay_capacity = 50000
     WrappedPrioritizedReplayBuffer.batch_size = 128
-    """.format(min_replay_history, update_period, target_update_period, num_iterations, training_steps,
+    """.format(update_horizon, min_replay_history, update_period, target_update_period, learning_rate, num_iterations, training_steps,
                evaluation_steps)
     return config
 
-def run(mrh, up, tup):
-    DIR = "auto_1/"
+def run(mrh, up, tup, uh, lr):
+    DIR = "auto_2/"
     create_folder_if_not_exists(DIR)
 
     num_training_steps = 100000
@@ -67,15 +67,17 @@ def run(mrh, up, tup):
     num_iterations = 10
     # num_training_steps = 1000
     # evaluation_steps = 1000
-    # num_iterations = 6
+    # num_iterations = 3
 
     kwargs = {"min_replay_history": mrh, "update_period": up,
               "training_steps": num_training_steps,
               "evaluation_steps": evaluation_steps, "target_update_period": tup,
+              "update_horizon": uh,
+              "learning_rate": lr,
               "num_iterations": num_iterations}
     config = gen_config(**kwargs)
     gin.parse_config(config, skip_unknown=False)
-    LOG_PATH = DIR + str(mrh) + "_" + str(up) + '_' + str(tup)
+    LOG_PATH = DIR + str(mrh) + "_" + str(up) + '_' + str(tup) + str(uh)
 
     def create_agent(sess, environment, summary_writer=None):
         return rainbow_agent.RainbowAgent(sess, num_actions=environment.action_space.n)
@@ -91,16 +93,19 @@ def run(mrh, up, tup):
 def objective(trial):
     min_replay_histories = trial.suggest_int('min_replay_histories', 100, 40000)
     update_periods = trial.suggest_int('update_periods', 1, 8)
-    target_update_periods = trial.suggest_int('target_update_periods', 50, 80000)
+    target_update_periods = trial.suggest_int('target_update_periods', 50, 20000)
+    update_horizon = trial.suggest_int('update_horizon', 1, 8)
+    learning_rate = trial.suggest_uniform('learning_rate', 0.01, 0.15)
 
-    return -1 * run(min_replay_histories, update_periods, target_update_periods)
+    # Must minimize, recording negative of the score to maximize positive score
+    return run(min_replay_histories, update_periods, target_update_periods, update_horizon, learning_rate)
 
 if __name__ == '__main__':
-    # optuna create-study --study-name "autotune_1" --storage "sqlite:///autotune_1.db"
+    # optuna create-study --study-name "autotune_2" --direction "maximize" --storage "sqlite:///autotune_2.db"
     # hyper_opt_autotuner()
-    study = optuna.load_study(study_name='autotune_1', storage='sqlite:///autotune_1.db')
+    study = optuna.load_study(study_name='autotune_2', storage='sqlite:///autotune_2.db')
     # study.optimize(hyper_opt_autotuner, n_trials=250)
-    study.optimize(objective, n_trials=8)
+    study.optimize(objective, n_trials=12)
 
 # study = optuna.load_study(study_name='autotune_1', storage='sqlite:///autotune_1.db')
 # df = study.trials_dataframe(attrs=('number', 'value', 'params', 'state'))
