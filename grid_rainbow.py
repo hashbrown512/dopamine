@@ -1,20 +1,21 @@
 import numpy as np
 import os
+from os import path
 from dopamine.agents.rainbow import rainbow_agent
 from dopamine.discrete_domains import run_experiment, gym_lib
 from dopamine.colab import utils as colab_utils
 from absl import flags
 import gin.tf
-
+import pandas as pd
 
 def create_folder_if_not_exists(folder_path):
-	if not os.path.exists(folder_path):
-		os.makedirs(folder_path, exist_ok=True)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path, exist_ok=True)
 
 
-def gen_config(min_replay_history, update_period, target_update_period, num_iterations, training_steps,
-			   evaluation_steps):
-	config = """
+def gen_config(update_horizon, min_replay_history, update_period, target_update_period, learning_rate, num_iterations, training_steps,
+               evaluation_steps):
+    config = """
     # chosen achieve reasonable performance.
     import dopamine.agents.rainbow.rainbow_agent
     import dopamine.discrete_domains.gym_lib
@@ -29,7 +30,7 @@ def gen_config(min_replay_history, update_period, target_update_period, num_iter
     RainbowAgent.num_atoms = 51
     RainbowAgent.vmax = 10.
     RainbowAgent.gamma = 0.99
-    RainbowAgent.update_horizon = 3
+    RainbowAgent.update_horizon = {}
     RainbowAgent.min_replay_history = {}
     RainbowAgent.update_period = {}
     RainbowAgent.target_update_period = {}
@@ -39,7 +40,7 @@ def gen_config(min_replay_history, update_period, target_update_period, num_iter
     RainbowAgent.tf_device = '/cpu:*'
     RainbowAgent.optimizer = @tf.train.AdamOptimizer()
 
-    tf.train.AdamOptimizer.learning_rate = 0.09
+    tf.train.AdamOptimizer.learning_rate = {}
     tf.train.AdamOptimizer.epsilon = 0.0003125
 
     # TODO: figure out how to make the environment with gym make
@@ -54,12 +55,10 @@ def gen_config(min_replay_history, update_period, target_update_period, num_iter
 
     WrappedPrioritizedReplayBuffer.replay_capacity = 50000
     WrappedPrioritizedReplayBuffer.batch_size = 128
-    """.format(min_replay_history, update_period, target_update_period, num_iterations, training_steps,
-			   evaluation_steps)
-	return config
+    """.format(update_horizon, min_replay_history, update_period, target_update_period, learning_rate, num_iterations, training_steps,
+               evaluation_steps)
+    return config
 
-
-print(gen_config(10, 100, 10, 2, 2000, 1000))
 
 # min_replay_histories = [500, 5000, 20000]
 # update_periods = [1, 2, 4]
@@ -78,40 +77,102 @@ print(gen_config(10, 100, 10, 2, 2000, 1000))
 # evaluation_steps = 1000
 # num_iterations = 2
 
-DIR = "grid_1/"
-create_folder_if_not_exists(DIR)
+grid_dir = 'grid_1/'
+grid_file = grid_dir + 'results.csv'
+create_folder_if_not_exists(grid_dir)
 
+# Run 1
+update_horizons = [1,3]
 min_replay_histories = [500, 5000, 20000]
 update_periods = [1, 4]
-target_update_periods = [50, 100, 1000, 4000, 80000]
-num_training_steps = 100000
-evaluation_steps = 200000
-num_iterations = 10
+target_update_periods = [50]
+num_training_steps = 500000
+evaluation_steps = 500000
+num_iterations = 2
 
-all_end = []
-for mrh in min_replay_histories:
-	for up in update_periods:
-		for tup in target_update_periods:
-			kwargs = {"min_replay_history": mrh, "update_period": up,
-					  "training_steps": num_training_steps,
-					  "evaluation_steps": evaluation_steps, "target_update_period": tup,
-					  "num_iterations": num_iterations}
-			config = gen_config(**kwargs)
-			gin.parse_config(config, skip_unknown=False)
-			LOG_PATH = DIR + str(mrh) + "_" + str(up)
+# Run 2
+# update_horizons = [1,3]
+# min_replay_histories = [500, 5000, 20000]
+# update_periods = [1, 4]
+# target_update_periods = [100]
+# num_training_steps = 500000
+# evaluation_steps = 500000
+# num_iterations = 2
+
+# Run 3
+# update_horizons = [1,3]
+# min_replay_histories = [500, 5000, 20000]
+# update_periods = [1, 4]
+# target_update_periods = [1000]
+# num_training_steps = 500000
+# evaluation_steps = 500000
+# num_iterations = 2
+
+# Run 4
+# update_horizons = [1,3]
+# min_replay_histories = [500, 5000, 20000]
+# update_periods = [1, 4]
+# target_update_periods = 4000]
+# num_training_steps = 500000
+# evaluation_steps = 500000
+# num_iterations = 2
+
+# Run 5
+# update_horizons = [1,3]
+# min_replay_histories = [500, 5000, 20000]
+# update_periods = [1, 4]
+# target_update_periods = [8000]
+# num_training_steps = 500000
+# evaluation_steps = 500000
+# num_iterations = 2
 
 
-			def create_agent(sess, environment, summary_writer=None):
-				return rainbow_agent.RainbowAgent(sess, num_actions=environment.action_space.n)
+
+# update_horizons = [1]
+# min_replay_histories = [500, 5000]
+# update_periods = [1]
+# target_update_periods = [50, 100]
+# learning_rate = 0.09
+# num_training_steps = 1000
+# evaluation_steps = 1000
+# num_iterations = 2
+
+for uh in update_horizons:
+    for mrh in min_replay_histories:
+        for up in update_periods:
+            for tup in target_update_periods:
+                kwargs = {"min_replay_history": mrh, "update_period": up,
+                          "training_steps": num_training_steps,
+                          "evaluation_steps": evaluation_steps, "target_update_period": tup,
+                          "update_horizon": uh,
+                          "learning_rate": learning_rate,
+                          "num_iterations": num_iterations}
+                config = gen_config(**kwargs)
+                gin.parse_config(config, skip_unknown=False)
+                LOG_PATH = grid_dir + str(mrh) + "_" + str(up) + '_' + str(tup) + str(uh)
 
 
-			rainbow_runner = run_experiment.TrainRunner(LOG_PATH, create_agent,
-														create_environment_fn=gym_lib.create_gym_environment)
-			rainbow_runner.run_experiment()
-			data = colab_utils.read_experiment(
-				LOG_PATH, verbose=True, summary_keys=['train_episode_returns', 'train_average_return'])
-			final_eval = data.loc[data['iteration'] == num_iterations - 1]['train_episode_returns'][1]
-			all_end.append(final_eval)
-			with open(DIR + "aresfile.txt", "a") as myfile:
-				myfile.write("average score: " + str(final_eval) + "   MODEL: " + str(kwargs) + '\n')
-print(all_end)
+                def create_agent(sess, environment, summary_writer=None):
+                    return rainbow_agent.RainbowAgent(sess, num_actions=environment.action_space.n)
+
+                # TODO: rerunning may require changing the create agent function to load the agent
+                rainbow_runner = run_experiment.TrainRunner(LOG_PATH, create_agent,
+                                                            create_environment_fn=gym_lib.create_gym_environment)
+                rainbow_runner.run_experiment()
+                data = colab_utils.read_experiment(
+                    LOG_PATH, verbose=True, summary_keys=['train_episode_returns', 'train_average_return'])
+                final_eval = data.loc[data['iteration'] == num_iterations - 1]['train_episode_returns'][1]
+                kwargs["average_episode_reward"] = final_eval
+
+                if path.exists(grid_file):
+                    df = pd.read_csv(grid_file, index_col=0)
+                    df = df.append(kwargs, ignore_index=True)
+                    print(df)
+                else:
+                    df = pd.DataFrame(columns = ["average_episode_reward", "min_replay_history",  "update_period",
+                                      "training_steps",
+                                      "evaluation_steps", "target_update_period",
+                                      "num_iterations"])
+                    df = df.append(kwargs, ignore_index=True)
+                print(df)
+                df.to_csv(grid_file)
