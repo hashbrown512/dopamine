@@ -62,9 +62,9 @@ def run(mrh, up, tup, uh, lr):
     DIR = "auto_2/"
     create_folder_if_not_exists(DIR)
 
-    num_training_steps = 100000
-    evaluation_steps = 200000
-    num_iterations = 10
+    num_training_steps = 1000000
+    evaluation_steps = 500000
+    num_iterations = 1
     # num_training_steps = 1000
     # evaluation_steps = 1000
     # num_iterations = 3
@@ -105,9 +105,9 @@ if __name__ == '__main__':
     # hyper_opt_autotuner()
     study = optuna.load_study(study_name='autotune_2', storage='sqlite:///autotune_2.db')
     # study.optimize(hyper_opt_autotuner, n_trials=250)
-    study.optimize(objective, n_trials=12)
+    study.optimize(objective, n_trials=17)
 
-# study = optuna.load_study(study_name='autotune_1', storage='sqlite:///autotune_1.db')
+# study = optuna.load_study(study_name='autotune_2', storage='sqlite:///autotune_2.db')
 # df = study.trials_dataframe(attrs=('number', 'value', 'params', 'state'))
 # csv = df.to_csv(index=False)
 # print(csv)
