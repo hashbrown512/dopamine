@@ -77,7 +77,7 @@ def gen_config(update_horizon, min_replay_history, update_period, target_update_
 # evaluation_steps = 1000
 # num_iterations = 2
 
-grid_dir = 'grid_5M/'
+grid_dir = 'grid_10M/'
 grid_file = grid_dir + 'results.csv'
 create_folder_if_not_exists(grid_dir)
 
