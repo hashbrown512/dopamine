@@ -103,7 +103,7 @@ create_folder_if_not_exists(grid_dir)
 
 # Run 3
 update_horizons = [3]
-min_replay_histories = [20000]
+min_replay_histories = [5000]
 update_periods = [4]
 target_update_periods = [4000, 8000]
 learning_rate = 0.09
