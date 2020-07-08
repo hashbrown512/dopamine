@@ -59,10 +59,10 @@ def gen_config(update_horizon, min_replay_history, update_period, target_update_
     return config
 
 def run(mrh, up, tup, uh, lr):
-    DIR = "auto_10m/"
+    DIR = "auto_5m/"
     create_folder_if_not_exists(DIR)
 
-    num_training_steps = 10000000
+    num_training_steps = 5000000
     evaluation_steps = 500000
     num_iterations = 1
     # num_training_steps = 1000
@@ -101,9 +101,9 @@ def objective(trial):
     return run(min_replay_histories, update_periods, target_update_periods, update_horizon, learning_rate)
 
 if __name__ == '__main__':
-    # optuna create-study --study-name "autotune_10m" --direction "maximize" --storage "sqlite:///autotune_10m.db"
+    # optuna create-study --study-name "autotune_5m" --direction "maximize" --storage "sqlite:///autotune_5m.db"
     # hyper_opt_autotuner()
-    study = optuna.load_study(study_name='autotune_10m', storage='sqlite:///autotune_10m.db')
+    study = optuna.load_study(study_name='autotune_5m', storage='sqlite:///autotune_5m.db')
     # study.optimize(hyper_opt_autotuner, n_trials=250)
     study.optimize(objective, n_trials=10)
 
