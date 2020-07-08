@@ -59,15 +59,15 @@ def gen_config(update_horizon, min_replay_history, update_period, target_update_
     return config
 
 def run(mrh, up, tup, uh, lr):
-    DIR = "auto_2/"
+    DIR = "auto_10m/"
     create_folder_if_not_exists(DIR)
 
-    num_training_steps = 1000000
+    num_training_steps = 10000000
     evaluation_steps = 500000
     num_iterations = 1
     # num_training_steps = 1000
-    # evaluation_steps = 1000
-    # num_iterations = 3
+    # evaluation_steps = 500
+    # num_iterations = 1
 
     kwargs = {"min_replay_history": mrh, "update_period": up,
               "training_steps": num_training_steps,
@@ -101,11 +101,11 @@ def objective(trial):
     return run(min_replay_histories, update_periods, target_update_periods, update_horizon, learning_rate)
 
 if __name__ == '__main__':
-    # optuna create-study --study-name "autotune_2" --direction "maximize" --storage "sqlite:///autotune_2.db"
+    # optuna create-study --study-name "autotune_10m" --direction "maximize" --storage "sqlite:///autotune_10m.db"
     # hyper_opt_autotuner()
-    study = optuna.load_study(study_name='autotune_2', storage='sqlite:///autotune_2.db')
+    study = optuna.load_study(study_name='autotune_10m', storage='sqlite:///autotune_10m.db')
     # study.optimize(hyper_opt_autotuner, n_trials=250)
-    study.optimize(objective, n_trials=17)
+    study.optimize(objective, n_trials=10)
 
 # study = optuna.load_study(study_name='autotune_2', storage='sqlite:///autotune_2.db')
 # df = study.trials_dataframe(attrs=('number', 'value', 'params', 'state'))
