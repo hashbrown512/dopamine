@@ -112,24 +112,24 @@ create_folder_if_not_exists(grid_dir)
 # num_iterations = 1
 
 # # Run 4
-# update_horizons = [1,3]
-# min_replay_histories = [20000]
-# update_periods = [1, 4]
-# target_update_periods = [8000]
-# learning_rate = 0.09
-# num_training_steps = 10000000
-# evaluation_steps = 500000
-# num_iterations = 1
-
-# Run 5
 update_horizons = [1,3]
 min_replay_histories = [20000]
 update_periods = [1, 4]
-target_update_periods = [16000]
+target_update_periods = [8000]
 learning_rate = 0.09
 num_training_steps = 10000000
 evaluation_steps = 500000
 num_iterations = 1
+
+# Run 5
+# update_horizons = [1,3]
+# min_replay_histories = [20000]
+# update_periods = [1, 4]
+# target_update_periods = [16000]
+# learning_rate = 0.09
+# num_training_steps = 10000000
+# evaluation_steps = 500000
+# num_iterations = 1
 
 
 
