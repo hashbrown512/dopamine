@@ -77,7 +77,7 @@ def gen_config(update_horizon, min_replay_history, update_period, target_update_
 # evaluation_steps = 1000
 # num_iterations = 2
 
-grid_dir = 'grid_5M/'
+grid_dir = 'grid_10M_r/'
 grid_file = grid_dir + 'results.csv'
 create_folder_if_not_exists(grid_dir)
 
@@ -87,7 +87,7 @@ create_folder_if_not_exists(grid_dir)
 # update_periods = [1, 4]
 # target_update_periods = [50]
 # learning_rate = 0.09
-# num_training_steps = 5000000
+# num_training_steps = 10000000
 # evaluation_steps = 500000
 # num_iterations = 1
 
@@ -97,7 +97,7 @@ create_folder_if_not_exists(grid_dir)
 # update_periods = [1, 4]
 # target_update_periods = [100]
 # learning_rate = 0.09
-# num_training_steps = 5000000
+# num_training_steps = 10000000
 # evaluation_steps = 500000
 # num_iterations = 1
 
@@ -107,7 +107,7 @@ create_folder_if_not_exists(grid_dir)
 # update_periods = [1,4]
 # target_update_periods = [4000]
 # learning_rate = 0.09
-# num_training_steps = 5000000
+# num_training_steps = 10000000
 # evaluation_steps = 500000
 # num_iterations = 1
 
@@ -117,7 +117,7 @@ create_folder_if_not_exists(grid_dir)
 # update_periods = [1, 4]
 # target_update_periods = [8000]
 # learning_rate = 0.09
-# num_training_steps = 5000000
+# num_training_steps = 10000000
 # evaluation_steps = 500000
 # num_iterations = 1
 
@@ -127,7 +127,7 @@ min_replay_histories = [20000]
 update_periods = [1, 4]
 target_update_periods = [16000]
 learning_rate = 0.09
-num_training_steps = 5000000
+num_training_steps = 10000000
 evaluation_steps = 500000
 num_iterations = 1
 
