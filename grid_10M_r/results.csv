@@ -1,0 +1,11 @@
+,average_episode_reward,min_replay_history,update_period,training_steps,evaluation_steps,target_update_period,num_iterations,learning_rate,update_horizon
+0,"0    121.47107
+Name: train_episode_returns, dtype: float64",20000,1,10000000,500000,4000,1,0.09,1.0
+1,"0    100.840969
+Name: train_episode_returns, dtype: float64",20000,1,10000000,500000,100,1,0.09,1.0
+2,"0    49.879835
+Name: train_episode_returns, dtype: float64",20000,1,10000000,500000,50,1,0.09,1.0
+3,"0    30.829862
+Name: train_episode_returns, dtype: float64",20000,1,10000000,500000,8000,1,0.09,1.0
+4,"0    96.524078
+Name: train_episode_returns, dtype: float64",20000,1,10000000,500000,16000,1,0.09,1.0
