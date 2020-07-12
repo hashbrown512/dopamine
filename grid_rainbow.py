@@ -77,55 +77,55 @@ def gen_config(update_horizon, min_replay_history, update_period, target_update_
 # evaluation_steps = 1000
 # num_iterations = 2
 
-grid_dir = 'grid_5M/'
+grid_dir = 'grid_10M_r/'
 grid_file = grid_dir + 'results.csv'
 create_folder_if_not_exists(grid_dir)
 
 # Run 1
-# update_horizons = [1,3]
-# min_replay_histories = [500, 5000, 20000]
-# update_periods = [1, 4]
-# target_update_periods = [50]
-# learning_rate = 0.09
-# num_training_steps = 500000
-# evaluation_steps = 500000
-# num_iterations = 2
-
-# Run 2
-# update_horizons = [1,3]
-# min_replay_histories = [500, 5000, 20000]
-# update_periods = [1, 4]
-# target_update_periods = [100]
-# learning_rate = 0.09
-# num_training_steps = 500000
-# evaluation_steps = 500000
-# num_iterations = 2
-
-# Run 3
-update_horizons = [3]
-min_replay_histories = [5000]
-update_periods = [4]
-target_update_periods = [4000, 8000]
+update_horizons = [1,3]
+min_replay_histories = [20000]
+update_periods = [1, 4]
+target_update_periods = [50]
 learning_rate = 0.09
-num_training_steps = 5000000
+num_training_steps = 10000000
 evaluation_steps = 500000
 num_iterations = 1
 
-# # Run 4
+# Run 2
 # update_horizons = [1,3]
-# min_replay_histories = [500, 5000, 20000]
+# min_replay_histories = [20000]
 # update_periods = [1, 4]
+# target_update_periods = [100]
+# learning_rate = 0.09
+# num_training_steps = 10000000
+# evaluation_steps = 500000
+# num_iterations = 1
+
+# Run 3
+# update_horizons = [1,3]
+# min_replay_histories = [20000]
+# update_periods = [1,4]
 # target_update_periods = [4000]
 # learning_rate = 0.09
-# num_training_steps = 500000
+# num_training_steps = 10000000
 # evaluation_steps = 500000
-# num_iterations = 2
+# num_iterations = 1
+
+# # Run 4
+# update_horizons = [1,3]
+# min_replay_histories = [20000]
+# update_periods = [1, 4]
+# target_update_periods = [8000]
+# learning_rate = 0.09
+# num_training_steps = 10000000
+# evaluation_steps = 500000
+# num_iterations = 1
 
 # Run 5
 # update_horizons = [1,3]
-# min_replay_histories = [500, 5000, 20000]
+# min_replay_histories = [20000]
 # update_periods = [1, 4]
-# target_update_periods = [8000]
+# target_update_periods = [16000]
 # learning_rate = 0.09
 # num_training_steps = 10000000
 # evaluation_steps = 500000
@@ -154,7 +154,7 @@ for uh in update_horizons:
                           "num_iterations": num_iterations}
                 config = gen_config(**kwargs)
                 gin.parse_config(config, skip_unknown=False)
-                LOG_PATH = grid_dir + str(mrh) + "_" + str(up) + '_' + str(tup) + str(uh)
+                LOG_PATH = grid_dir + str(mrh) + "_" + str(up) + '_' + str(tup) + '_' + str(uh)
 
 
                 def create_agent(sess, environment, summary_writer=None):
@@ -166,7 +166,7 @@ for uh in update_horizons:
                 rainbow_runner.run_experiment()
                 data = colab_utils.read_experiment(
                     LOG_PATH, verbose=True, summary_keys=['train_episode_returns', 'train_average_return'])
-                final_eval = data.loc[data['iteration'] == num_iterations - 1]['train_episode_returns'][1]
+                final_eval = data.loc[data['iteration'] == num_iterations - 1]['train_episode_returns'][data['iteration'] == num_iterations - 1]
                 kwargs["average_episode_reward"] = final_eval
 
                 if path.exists(grid_file):

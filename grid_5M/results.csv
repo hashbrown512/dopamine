@@ -1,0 +1,21 @@
+,average_episode_reward,min_replay_history,update_period,training_steps,evaluation_steps,target_update_period,num_iterations,learning_rate,update_horizon
+0,"0   -46.19104
+Name: train_episode_returns, dtype: float64",20000,1,5000000,500000,8000,1,0.09,1.0
+1,"0   -25.431486
+Name: train_episode_returns, dtype: float64",20000,1,5000000,500000,100,1,0.09,1.0
+2,"0    8.631968
+Name: train_episode_returns, dtype: float64",20000,1,5000000,500000,50,1,0.09,1.0
+3,"0    14.081853
+Name: train_episode_returns, dtype: float64",20000,1,5000000,500000,8000,1,0.09,1.0
+4,"0    10.125322
+Name: train_episode_returns, dtype: float64",20000,1,5000000,500000,4000,1,0.09,1.0
+5,"0    54.589403
+Name: train_episode_returns, dtype: float64",20000,4,5000000,500000,8000,1,0.09,1.0
+6,"0   -0.861626
+Name: train_episode_returns, dtype: float64",20000,4,5000000,500000,100,1,0.09,1.0
+7,"0    192.286362
+Name: train_episode_returns, dtype: float64",20000,4,5000000,500000,50,1,0.09,1.0
+8,"0    31.792961
+Name: train_episode_returns, dtype: float64",20000,4,5000000,500000,8000,1,0.09,1.0
+9,"0    91.725749
+Name: train_episode_returns, dtype: float64",20000,4,5000000,500000,4000,1,0.09,1.0
